@@ -27,6 +27,12 @@ namespace CycloneDX.Models
         Project
     }
 
+    public class ProjectDotnetDependency : DotnetDependency
+    {
+        public string OutputFilename { get; set; }
+        public string Hash { get; set; }
+    }
+
     [SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     public class DotnetDependency : IComparable
     {
@@ -87,7 +93,7 @@ namespace CycloneDX.Models
 
         public override string ToString()
         {
-            return $"{Name}@{Version}"; 
+            return $"{Name}@{Version}";
         }
     }
 }

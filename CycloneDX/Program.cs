@@ -18,8 +18,10 @@
 using System;
 using System.CommandLine;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CycloneDX.Models;
+using Microsoft.Build.Locator;
 
 namespace CycloneDX
 {
@@ -27,7 +29,9 @@ namespace CycloneDX
     {
         public static Task<int> Main(string[] args)
         {
-
+            var instances =
+                MSBuildLocator.QueryVisualStudioInstances().ToList();
+            MSBuildLocator.RegisterInstance(instances.First());
 
             var SolutionOrProjectFile = new Argument<string>("path", description: "The path to a .sln, .slnx, .csproj, .fsproj, .vbproj, .xsproj, or packages.config file or the path to a directory which will be recursively analyzed for packages.config files.");
             var framework = new Option<string>(new[] { "--framework", "-tfm" }, "The target framework to use. If not defined, all will be aggregated.");

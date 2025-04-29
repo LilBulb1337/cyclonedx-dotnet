@@ -32,6 +32,8 @@
 
   <ItemGroup>
     <PackageReference Include="CycloneDX.Core" />
+    <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="NuGet.Protocol" />
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="System.IO.Abstractions" />

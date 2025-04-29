@@ -55,7 +55,9 @@ namespace CycloneDX
             projectAssetsFileService ??= new ProjectAssetsFileService(this.fileSystem, () => new AssetFileReader());
             this.dotnetUtilsService = dotnetUtilsService ?? new DotnetUtilsService(this.fileSystem, this.dotnetCommandService);
             this.packagesFileService = packagesFileService ?? new PackagesFileService(this.fileSystem);
-            this.projectFileService = projectFileService ?? new ProjectFileService(this.fileSystem, this.dotnetUtilsService, this.packagesFileService, projectAssetsFileService);
+            // TODO ProjectService needs to be selectable with a parameter on starting the tool
+            // this.projectFileService = projectFileService ?? new ProjectFileService(this.fileSystem, this.dotnetUtilsService, this.packagesFileService, projectAssetsFileService);
+            this.projectFileService = projectFileService ?? new ProjectFileServiceMsBuild(this.fileSystem, this.dotnetUtilsService, this.packagesFileService, projectAssetsFileService);
             this.solutionFileService = solutionFileService ?? new SolutionFileService(this.fileSystem, this.projectFileService);
             this.nugetServiceFactory = nugetServiceFactory ?? new NugetV3ServiceFactory();
         }
@@ -238,12 +240,12 @@ namespace CycloneDX
                 return (int)ExitCode.InvalidOptions;
             }
 
-            // Remove transitive (via project references) dev-dependencies 
+            // Remove transitive (via project references) dev-dependencies
             // Dev dependencies of referenced projects are typically not included in the assets file.
             // However, if the dev-dependency is transitive—meaning another dependency of that project depends on it—
             // the dev-dependency will be listed in the assets file under targets with a version range.
             // But a corresponding entry under libraries is missing.
-            // This results in a state where there is a dependency on a package but no corresponding package.  
+            // This results in a state where there is a dependency on a package but no corresponding package.
             // To resolve this, we remove such dependencies.
             var allDependencies = packages.Where(p => p.Dependencies is not null).SelectMany(p => p.Dependencies!.Keys).ToHashSet();
             var dependenciesWithoutPackages = allDependencies.Except(packages.Select(p => p.Name)).ToHashSet();
@@ -261,19 +263,17 @@ namespace CycloneDX
                     {
                         await Console.Out.WriteLineAsync($"Removed transitive dependency {dep} from {package.Name}");
                     }
-                }                
+                }
             }
+
             Console.ResetColor();
 
-            
             await Console.Out.WriteLineAsync($"Found {packages.Count()} packages");
-            
 
             if (!string.IsNullOrEmpty(setName))
             {
                 topLevelComponent.Name = setName;
             }
-
 
             if (excludeDev)
             {
@@ -283,9 +283,6 @@ namespace CycloneDX
                 }
                 await Console.Out.WriteLineAsync($"{packages.Where(p => p.IsDevDependency).Count()} packages being excluded as DevDependencies");
             }
-
-
-
 
             // get all the components and dependency graph from the NuGet packages
             var components = new HashSet<Component>();
@@ -384,7 +381,6 @@ namespace CycloneDX
                     directDependencies.Dependencies.Add(new Dependency { Ref = dep.Ref });
                 }
             }
-
 
             // create the BOM
             Console.WriteLine();
