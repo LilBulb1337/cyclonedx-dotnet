@@ -311,7 +311,7 @@ namespace CycloneDX.Services
                 Scope = scope,
                 Type = Component.Classification.Library,
                 BomRef = $"{name}@{version}",
-                Cpe = $"cpe:2.3:a:{vendor}:{productName}:{productVersion}:*:*:*:*:*:*:*",
+                Cpe = Cpe.Create(part: "a", vendor: vendor, product: productName, version: productVersion),
                 Properties = [ new Property { Name = "filename", Value = Path.GetFileName(specialData.filename) } ],
                 Hashes = [ new Hash { Alg = Hash.HashAlgorithm.SHA3_256, Content = specialData.hash } ]
             };
